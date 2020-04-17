@@ -1,0 +1,613 @@
+{% extends 'weather/base.html' %}
+{% block content %}
+<div class="container-fluid">
+    <div style="color:#555;">Developed By: Abhijeet Anand Shah</div>
+    <div class="row align-items-start justify-content-center" style="height:68%;padding:20px;">
+        <div class="col-9 align-self-center">
+            <div class="card text-capitalize">
+                <div class="card-header text-center">
+                    <h4 id="place" style="margin-top:0.5rem;">Place</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 d-flex align-items-center justify-content-around">
+                            <div>
+                                <h6 class="card-title" id="weather_type_h6">Weather Type : <span
+                                        id="weather_type"></span></h6>
+                                <h5 class="card-title">Temperature : <span id="temperature"></span> K</h5>
+                                <h6 class="card-title" id="feels_like_h6">Feels like : <span id="feels_like"></span> K
+                                </h6>
+                                <h6 class="card-title">Humidity : <span id="humidity"></span> %</h6>
+                            </div>
+                            <div>
+                                <img class="img_span" src="" id="weather_img" alt="weather_image"/>
+                            </div>
+                        </div>
+                        <div class="col-1">
+                            <div style="background: rgba(1, 1, 1, 0.4);height:90%;width:1.5px;"></div>
+                        </div>
+                        <div class="col-5 align-items-center">
+                            <h6 class="card-text">Wind Speed : <span id="wind_speed"></span> meter/sec</h6>
+                            <h6 class="card-text">UV Index : <span id="uvi"></span></h6>
+                            <h6 class="card-text" id="visibility_h6">Visibility : <span id="visibility"></span> meters
+                            </h6>
+                            <h6 class="card-title">Sea-Level Pressure : <span id="sea_level_pressure"></span> millibars
+                            </h6>
+                            <h6>Lat : <span id="geo-lat"></span>&nbsp;&nbsp;Long : <span id="geo-long"></span></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <h5 id="date-time"></h5>
+                    <p style="font-size:10px;">(Last updated)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row align-items-center justify-content-center" style="height:15%;">
+        <div class="col-9 align-self-center">
+            <input type="hidden" id="access_token" value="{{ access_token }}">
+            <div class="input-group">
+                <select class="custom-select" id="selectCountry">
+                    <option disabled selected>Country...</option>
+                    {% for country in countries %}
+                    <option value="{{ country }}">{{ country.title }}</option>
+                    {% endfor %}
+                </select>
+                <select class="custom-select" id="selectState">
+                    <option disabled selected>State...</option>
+                </select>
+                <select class="custom-select" id="selectCity">
+                    <option disabled selected>City...</option>
+                </select>
+                <div class="datepicker date p-0">
+                    <input type="text" placeholder="Choose a date" class="form-control" id="weatherDate"
+                           style="border-radius: 0;background-color: white;" readonly>
+                    <div class="input-group-append"></div>
+                </div>
+                <div class="input-group-append">
+                    <span class="input-group-text date-pick-icon"><i class="fa fa-calendar"></i></span>
+                    <button id="search-weather" type="submit" class="btn btn-secondary custom-btn-search">
+                        <span>Search <i class="fa fa-search" aria-hidden="true"></i></span>
+                    </button>
+                </div>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="downloadReport" value="option1">
+                <label class="form-check-label" for="downloadReport" style="font-size:15px;color:#fff;">
+                    Download Weather Report
+                </label>
+            </div>
+            <div class="d-flex justify-content-center" style="padding-top:15px;">
+                <button type="button" class="btn btn-Secondary" data-toggle="modal" data-target="#modal-assist">
+                    Assist
+                </button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <button type="button" class="btn btn-Secondary" data-toggle="modal" data-target="#modal-calculator">
+                    Calculator
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modal-assist" tabindex="-1" role="dialog"
+         aria-labelledby="modal-assist-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assist</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h5>Temperature to Celsius</h5>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="card-title">Temperature : <span id="modal-temperature-k"></span> K</h6>
+                            <h6 class="card-title">Temperature : <span id="modal-temperature-c"></span></h6>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-secondary" id="convert-temperature">Convert</button>
+                        </div>
+                    </div>
+                    <hr>
+                    <h5>Wind Speed to KM/H</h5>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="card-text">Wind Speed : <span id="modal-wind-speed-ms"></span> Meter/Sec</h6>
+                            <h6 class="card-text">Wind Speed : <span id="modal-wind-speed-kmh"></span></h6>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-secondary" id="convert-wind-speed">Convert</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modal-calculator" tabindex="-1" role="dialog"
+         aria-labelledby="modal-assist-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Calculator</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h6>Temperature</h6>
+                    <div class="form-row">
+                        <div class="col form-group">
+                            <label for="temp-c1">Celsius</label>
+                            <input type="number" class="form-control" id="temp-c1" value="0">
+                        </div>
+                        <div class="form-group">
+                            <div style="padding:10px;padding-top:42px;"><i class="fa fa-exchange"></i></div>
+                        </div>
+                        <div class="col form-group">
+                            <label for="temp-f">Fahrenheit</label>
+                            <input type="number" class="form-control" id="temp-f">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col form-group">
+                            <label for="temp-c2">Celsius</label>
+                            <input type="number" class="form-control" id="temp-c2" value="0">
+                        </div>
+                        <div class="form-group">
+                            <div style="padding:10px;padding-top:42px;"><i class="fa fa-exchange"></i></div>
+                        </div>
+                        <div class="col form-group">
+                            <label for="temp-k">Kelvin</label>
+                            <input type="number" class="form-control" id="temp-k">
+                        </div>
+                    </div>
+                    <hr/>
+                    <h6>Wind Speed</h6>
+                    <div class="form-row">
+                        <div class="col form-group">
+                            <label for="speed-m1">meter/sec</label>
+                            <input type="number" class="form-control" id="speed-m1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <div style="padding:10px;padding-top:42px;"><i class="fa fa-exchange"></i></div>
+                        </div>
+                        <div class="col form-group">
+                            <label for="speed-k">km/h</label>
+                            <input type="number" class="form-control" id="speed-k">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col form-group">
+                            <label for="speed-m2">meter/sec</label>
+                            <input type="number" class="form-control" id="speed-m2" value="1">
+                        </div>
+                        <div class="form-group">
+                            <div style="padding:10px;padding-top:42px;"><i class="fa fa-exchange"></i></div>
+                        </div>
+                        <div class="col form-group">
+                            <label for="speed-mi">mile/h</label>
+                            <input type="number" class="form-control" id="speed-mi">
+                        </div>
+                    </div>
+                    <hr/>
+                    <h6>Visibility Distance</h6>
+                    <div class="form-row">
+                        <div class="col form-group">
+                            <label for="visib-m">Meter</label>
+                            <input type="number" class="form-control" id="visib-m" value="1">
+                        </div>
+                        <div class="form-group">
+                            <div style="padding:10px;padding-top:42px;"><i class="fa fa-exchange"></i></div>
+                        </div>
+                        <div class="col form-group">
+                            <label for="visib-km">Kilometer</label>
+                            <input type="number" class="form-control" id="visib-km">
+                        </div>
+                    </div>
+                    <hr/>
+                    <h6>Pressure</h6>
+                    <div class="form-row">
+                        <div class="col form-group">
+                            <label for="press-m">Millibar</label>
+                            <input type="number" class="form-control" id="press-m" value="1">
+                        </div>
+                        <div class="form-group">
+                            <div style="padding:10px;padding-top:42px;"><i class="fa fa-exchange"></i></div>
+                        </div>
+                        <div class="col form-group">
+                            <label for="press-pa">Pascal</label>
+                            <input type="number" class="form-control" id="press-pa">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block javascript %}
+<script>
+$(function () {
+    $('.datepicker').datepicker({
+        autoclose : true,
+        format: "dd-mm-yyyy",
+        todayBtn : "linked",
+        todayHighlight : true,
+    });
+    $('.datepicker').datepicker("setDate",new Date());
+    var startdate = new Date();
+    startdate.setMonth(startdate.getMonth() - 1);
+    startdate.setDate(startdate.getDate() + 1);
+    $('.datepicker').datepicker("setStartDate", startdate);
+    $('.datepicker').datepicker("setEndDate", new Date());
+    $('.date-pick-icon').click(function() {
+        $(".datepicker").datepicker("show");
+    });
+});
+
+</script>
+<script>
+    function fetchData(selection_value, fetch_option) {
+        disableScreen();
+        var access_token = $("#access_token").val();
+        api_request_header = {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer ' + access_token,
+            'Cache-Control':'no-cache',
+        }
+        var apiURL = "";
+        if (fetch_option === "states") {
+            apiURL = "{{ settings.STATE_API }}" + selection_value;
+        } else if (fetch_option === "cities") {
+            apiURL = "{{ settings.CITY_API }}" + selection_value;
+        }
+        if (apiURL !== "") {
+            $.ajax(apiURL, {
+                method: "GET",
+                headers: api_request_header
+            })
+            .done(function (data, textStatus, jqXHR) {
+                if (data.length === 0 && fetch_option === "cities") {
+                    $("#selectCity").prop("disabled", "disabled");
+                    $("#selectCity").empty().append('<option disabled selected> N/A </option>');
+                }
+                if (jqXHR.status === 200) {
+                    data.forEach(function (item) {
+                        var option = document.createElement("option");
+                        if (fetch_option === "states") {
+                            option.value = item.state_name;
+                            option.text = item.state_name;
+                            document.getElementById('selectState').appendChild(option);
+                        } else if (fetch_option === "cities") {
+                            option.value = item.city_name;
+                            option.text = item.city_name;
+                            document.getElementById('selectCity').appendChild(option);
+                        }
+                    });
+                }
+                else {
+                    alert("Something went wrong...!!! Try Again...")
+                    window.location.href = '/error';
+                }
+                $('.loader-overlay').remove();
+            })
+            .fail(function (jqXHR, textStatus, errorThrown) {
+                var statusCode = jqXHR.status;
+                if (statusCode === 422) {
+                    var errors = jqXHR.responseJSON.errors;
+                    alert("Something went wrong...!!! Try Again...")
+                    window.location.href = '/error';
+                } else {
+                    alert("Something went wrong...!!! Try Again...")
+                    window.location.href = '/error';
+                }
+                $('.loader-overlay').remove();
+            });
+        }
+    }
+
+    function fetchLatLong(apiURL) {
+        disableScreen();
+        $.ajax(apiURL, {
+            method: "GET"
+        })
+        .done(function (data, textStatus, jqXHR) {
+            if (jqXHR.status === 200) {
+                var weather_date = $(".datepicker #weatherDate").val().split("-").reverse().join("-");
+                fetchWeather(data.latt, data.longt, weather_date);
+            }
+            else {
+                alert("Something went wrong...!!! Try Again...")
+                window.location.href = '/error';
+            }
+            $('.loader-overlay').remove();
+        })
+        .fail(function (jqXHR, textStatus, errorThrown) {
+            var statusCode = jqXHR.status;
+            if (statusCode === 422) {
+                var errors = jqXHR.responseJSON.errors;
+                alert("Something went wrong...!!! Try Again...")
+                window.location.href = '/error';
+            } else {
+                alert("Something went wrong...!!! Try Again...")
+                window.location.href = '/error';
+            }
+            $('.loader-overlay').remove();
+        });
+    }
+
+    function fetchWeather(latitude, longitude, weather_date) {
+        disableScreen();
+        if (latitude !== null && longitude !== null && weather_date !== null) {
+            var apiURL = "";
+            if (weather_date === new Date().toLocaleDateString().split("/").reverse().join("-")) {
+                apiURL = "{{ settings.WEATHER_BIT_CURRENT_API_URL }}?lat=" + latitude + "&lon=" + longitude + "&units=S&key={{ settings.WEATHER_BIT_API_KEY }}";
+            } else {
+                var weather_date_1 = new Date(weather_date);
+                weather_date_1.setDate(weather_date_1.getDate() + 1);
+                weather_date_1 = weather_date_1.toLocaleDateString().split("/").reverse().join("-");
+                apiURL = "{{ settings.WEATHER_BIT_API_URL }}?lat=" + latitude + "&lon=" + longitude + "&start_date=" + weather_date + "&end_date=" + weather_date_1 + "&units=S&key={{ settings.WEATHER_BIT_API_KEY }}";
+            }
+            $.ajax(apiURL, {
+                method: "GET"
+            })
+            .done(function (data, textStatus, jqXHR) {
+                if (jqXHR.status === 200) {
+                    var report_time = new Date(data.data[0].ts*1000).toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' });
+                    var place = localStorage.getItem("place");
+                    if (data.data[0]['weather'] !== undefined) {
+                        $("#weather_img").show();
+                        $("#weather_type_h6").show();
+                        var imageURL = "{{ settings.WEATHER_BIT_ICON_URL }}"+ data.data[0].weather.icon + ".png";
+                        $("#weather_img").attr("src", imageURL);
+                        $("#weather_type").text(data.data[0].weather.description);
+                    } else {
+                        $("#weather_img").hide();
+                        $("#weather_type_h6").hide();
+                    }
+                    $("#place").text(place);
+                    $("#geo-lat").text(latitude + "°");
+                    $("#geo-long").text(longitude + "°");
+                    $("#temperature").text(data.data[0].temp);
+                    if (data.data[0]['app_temp'] !== undefined) {
+                        $("#feels_like_h6").show();
+                        $("#feels_like").text(data.data[0].app_temp);
+                    } else {
+                        $("#feels_like_h6").hide();
+                    }
+                    $("#humidity").text(data.data[0].rh);
+                    $("#wind_speed").text(data.data[0].wind_spd);
+                    if (data.data[0]['uv'] !== undefined) {
+                        $("#uvi").text(data.data[0].uv);
+                    } else {
+                        $("#uvi").text(data.data[0].max_uv);
+                    }
+                    if (data.data[0]['vis'] !== undefined) {
+                        $("#visibility_h6").show();
+                        $("#visibility").text(data.data[0].vis * 1000);
+                    } else {
+                        $("#visibility_h6").hide();
+                    }
+                    $("#sea_level_pressure").text(data.data[0].slp);
+                    $("#date-time").text(report_time);
+                    if ($("#downloadReport").is(":checked")) {
+                        var text = place + "Weather Report - " +  report_time + "\n\n";
+                        text = text + "Latitude : " + latitude + "°\nLongitude : " + longitude + "°\n";
+                        text = text + "Temperature : " + data.data[0].temp + " K\n";
+                        if (data.data[0]['app_temp'] !== undefined) {
+                            text = text + "Feels like : " + data.data[0].app_temp + " K\n";
+                        }
+                        if (data.data[0]['weather'] !== undefined) {
+                            text = text + "Weather Type : " + data.data[0].weather.description.charAt(0).toUpperCase() + data.current.weather[0].description.slice(1) + "\n";
+                        }
+                        text = text + "Humidity : " + data.data[0].rh + " %\n";
+                        text = text + "Wind Speed : " + data.data[0].wind_spd + " meter/sec\n";
+                        text = text + "UV Index : " + data.data[0].uv + "\n";
+                        if (data.data[0]['vis'] !== undefined) {
+                            text = text + "Visibility : " + (data.data[0].vis * 1000) + " meters\n";
+                        }
+                        text = text + "Sea-Level Pressure : " + data.data[0].slp + " millibars\n";
+                        downloadReport(place, text);
+                    }
+                }
+                else {
+                    alert("Something went wrong...!!! Try Again...")
+                    window.location.href = '/error';
+                }
+                setTimeout(function() {
+                    $('.loader-overlay').remove();
+                }, 1000);
+            })
+            .fail(function (jqXHR, textStatus, errorThrown) {
+                var statusCode = jqXHR.status;
+                if (statusCode === 422) {
+                    var errors = jqXHR.responseJSON.errors;
+                    alert("Something went wrong...!!! Try Again...")
+                    window.location.href = '/error';
+                } else {
+                    alert("Something went wrong...!!! Try Again...")
+                    window.location.href = '/error';
+                }
+                $('.loader-overlay').remove();
+            });
+        } else {
+            alert("Something went wrong...!!! Try Again...")
+            window.location.href = '/error';
+        }
+    }
+
+    function downloadReport(place, text) {
+        var link = document.createElement("a");
+        var data = new Blob([text], {type: 'text/plain'});
+        var url = window.URL.createObjectURL(data);
+        link.href = url;
+        link.download="Report_" + place.replace(",", "-") + ".txt"
+        link.click();
+        $("#downloadReport").prop("checked", false);
+        window.URL.revokeObjectURL(url);
+    }
+
+    function TempCtoF() {
+        $("#temp-f").val((( parseFloat($("#temp-c1").val()) * 9/5 ) + 32).toFixed(3));
+    }
+    function TempFtoC() {
+        $("#temp-c1").val((( parseFloat($("#temp-f").val()) - 32 ) * 5/9).toFixed(3));
+    }
+    function TempCtoK() {
+        $("#temp-k").val(( parseFloat($("#temp-c2").val()) + 273.15 ).toFixed(3));
+    }
+    function TempKtoC() {
+        $("#temp-c2").val(( parseFloat($("#temp-k").val()) - 273.15 ).toFixed(3));
+    }
+    function WSpeedMStoKmH() {
+        $("#speed-k").val(( parseFloat($("#speed-m1").val()) * 3.6 ).toFixed(3));
+    }
+    function WSpeedKmHtoMS() {
+        $("#speed-m1").val(( parseFloat($("#speed-k").val()) / 3.6 ).toFixed(3));
+    }
+    function WSpeedMStoMiH() {
+        $("#speed-mi").val(( parseFloat($("#speed-m2").val()) * 2.237 ).toFixed(3));
+    }
+    function WSpeedMiHtoMS() {
+        $("#speed-m2").val(( parseFloat($("#speed-mi").val()) / 2.237 ).toFixed(3));
+    }
+    function VDisMtoKM() {
+        $("#visib-km").val(( parseFloat($("#visib-m").val()) / 1000 ).toFixed(3));
+    }
+    function VDisKMtoM() {
+        $("#visib-m").val(( parseFloat($("#visib-km").val()) * 1000 ).toFixed(3));
+    }
+    function PreMbtoPa() {
+        $("#press-pa").val(( parseFloat($("#press-m").val()) * 100 ).toFixed(3));
+    }
+    function PrePatoMb() {
+        $("#press-m").val(( parseFloat($("#press-pa").val()) / 1000 ).toFixed(3));
+    }
+
+    $(document).ready(function() {
+        localStorage.clear();
+        localStorage.setItem("place", "New Delhi, India");
+        var default_lat = 28.6139;
+        var default_long = 77.2090;
+        var default_weather_date = $(".datepicker #weatherDate").val().split("-").reverse().join("-");
+        fetchWeather(default_lat, default_long, default_weather_date);
+        $('#selectCountry').change(function() {
+            selectedCountry = $(this).val();
+            $("#selectState").empty().append('<option disabled selected>State...</option>');
+            fetchData(selectedCountry, "states");
+            $("#selectCity").prop("disabled", false);
+            $("#selectCity").empty().append('<option disabled selected>City...</option>');
+        });
+
+        $('#selectState').change(function() {
+            selectedState = $(this).val();
+            $("#selectCity").prop("disabled", false);
+            $("#selectCity").empty().append('<option disabled selected>City...</option>');
+            fetchData(selectedState, "cities");
+        });
+
+        $('#modal-assist').on('shown.bs.modal', function (e) {
+            $("#modal-temperature-k").text($("#temperature").text());
+            $("#modal-wind-speed-ms").text($("#wind_speed").text());
+        });
+
+        $('#modal-assist').on('hidden.bs.modal', function (e) {
+            $("#modal-temperature-k").text("");
+            $("#modal-temperature-c").text("");
+            $("#modal-wind-speed-ms").text("");
+            $("#modal-wind-speed-kmh").text("");
+        });
+
+        $("#convert-temperature").on("click", function() {
+            $("#modal-temperature-c").text((parseFloat($("#temperature").text()) - 273.15).toFixed(2) + " °C");
+        });
+
+        $("#convert-wind-speed").on("click", function() {
+            $("#modal-wind-speed-kmh").text((parseFloat($("#wind_speed").text()) * 3.6).toFixed(2) + " Kilometer/Hour");
+        });
+
+        $('#modal-calculator').on('shown.bs.modal', function (e) {
+            TempCtoF();
+            TempCtoK();
+            WSpeedMStoKmH();
+            WSpeedMStoMiH();
+            VDisMtoKM();
+            PreMbtoPa();
+        });
+
+        $('#modal-calculator').on('hidden.bs.modal', function (e) {
+            $("#temp-c1, #temp-c2").val(0);
+            $("#speed-m1, #speed-m2, #visib-m, #press-m").val(1);
+        });
+
+        $('#temp-c1').on("change keyup", function() {
+            TempCtoF();
+        });
+        $('#temp-f').on("change keyup", function() {
+            TempFtoC();
+        });
+        $('#temp-c2').on("change keyup", function() {
+            TempCtoK();
+        });
+        $('#temp-k').on("change keyup", function() {
+            TempKtoC();
+        });
+        $('#speed-m1').on("change keyup", function() {
+            WSpeedMStoKmH();
+        });
+        $('#speed-k').on("change keyup", function() {
+            WSpeedKmHtoMS();
+        });
+        $('#speed-m2').on("change keyup", function() {
+            WSpeedMStoMiH();
+        });
+        $('#speed-mi').on("change keyup", function() {
+            WSpeedMiHtoMS();
+        });
+        $('#visib-m').on("change keyup", function() {
+            VDisMtoKM();
+        });
+        $('#visib-km').on("change keyup", function() {
+            VDisKMtoM();
+        });
+        $('#press-m').on("change keyup", function() {
+            PreMbtoPa();
+        });
+        $('#press-pa').on("change keyup", function() {
+            PrePatoMb();
+        });
+
+        $("#search-weather").on("click", function() {
+            if ($('#selectCity').children().length === 1) {
+                var country = $('#selectCountry').val();
+                var state = $('#selectState').val();
+                var place = state + "," + country;
+                localStorage.setItem("place", place);
+                if (country === null || state === null) {
+                    alert("Please select an option");
+                } else if (country !== null && state !== null) {
+                    apiURL = "{{ settings.LAT_LONG_API }}" + state + "," + country + "?json=1";
+                    fetchLatLong(apiURL);
+                }
+            } else {
+                var country = $('#selectCountry').val();
+                var state = $('#selectState').val();
+                var city = $('#selectCity').val();
+                var place = city + "," + country;
+                localStorage.setItem("place", place);
+                if (country === null || state === null || city === null) {
+                    alert("Please select an option");
+                } else if (country !== null && city !== null) {
+                    apiURL = "{{ settings.LAT_LONG_API }}" + city + "," + country + "?json=1";
+                    fetchLatLong(apiURL);
+                }
+            }
+        });
+    });
+
+</script>
+{% endblock %}

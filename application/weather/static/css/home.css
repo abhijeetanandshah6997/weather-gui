@@ -1,0 +1,59 @@
+.body-background {
+    background-image: url('/static/images/background.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: top;
+    background-attachment: fixed;
+}
+
+.custom-btn-search {
+    border : none;
+    color : white;
+    background-image: linear-gradient(to left, #488214, #61B329);
+}
+
+.loader-overlay {
+    display:flex;
+    background-color:#EFEFEF;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    top: 0px;
+    left: 0px;
+    opacity: .5; /* in FireFox */
+    filter: alpha(opacity=50); /* in IE */
+}
+
+.loader-img {
+    font-size:85px;
+    margin:auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(to left, #488214, #61B329);
+}
+
+p {
+    margin-bottom:0;
+}
+
+.img_span {
+    float:right;
+    -webkit-filter: drop-shadow(7px 7px 5px #111);
+    filter: drop-shadow(7px 7px 5px #111);
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.datepicker-dropdown {
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+.datepicker td, .datepicker th {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 10px;
+}
