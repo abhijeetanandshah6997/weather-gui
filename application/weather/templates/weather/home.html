@@ -402,7 +402,7 @@ $(function () {
                             text = text + "Feels like : " + data.data[0].app_temp + " K\n";
                         }
                         if (data.data[0]['weather'] !== undefined) {
-                            text = text + "Weather Type : " + data.data[0].weather.description.charAt(0).toUpperCase() + data.current.weather[0].description.slice(1) + "\n";
+                            text = text + "Weather Type : " + data.data[0].weather.description.charAt(0).toUpperCase() + data.data[0].weather.description.slice(1) + "\n";
                         }
                         text = text + "Humidity : " + data.data[0].rh + " %\n";
                         text = text + "Wind Speed : " + data.data[0].wind_spd + " meter/sec\n";
