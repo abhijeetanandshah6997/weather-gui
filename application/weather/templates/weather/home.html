@@ -268,7 +268,8 @@ $(function () {
         if (apiURL !== "") {
             $.ajax(apiURL, {
                 method: "GET",
-                headers: api_request_header
+                headers: api_request_header,
+                crossDomain: true,
             })
             .done(function (data, textStatus, jqXHR) {
                 if (data.length === 0 && fetch_option === "cities") {
@@ -313,12 +314,13 @@ $(function () {
     function fetchLatLong(apiURL) {
         disableScreen();
         $.ajax(apiURL, {
-            method: "GET"
+            method: "GET",
+            crossDomain: true,
         })
         .done(function (data, textStatus, jqXHR) {
             if (jqXHR.status === 200) {
                 var weather_date = $(".datepicker #weatherDate").val().split("-").reverse().join("-");
-                fetchWeather(data.latt, data.longt, weather_date);
+                fetchWeather(data[0].lat, data[0].lon, weather_date);
             }
             else {
                 alert("Something went wrong...!!! Try Again...")
@@ -345,15 +347,16 @@ $(function () {
         if (latitude !== null && longitude !== null && weather_date !== null) {
             var apiURL = "";
             if (weather_date === new Date().toLocaleDateString().split("/").reverse().join("-")) {
-                apiURL = "{{ settings.WEATHER_BIT_CURRENT_API_URL }}?lat=" + latitude + "&lon=" + longitude + "&units=S&key={{ settings.WEATHER_BIT_API_KEY }}";
+                apiURL = "{{ settings.WEATHER_BIT_CURRENT_API_URL }}?lat=" + latitude + "&lon=" + longitude + "&key={{ settings.WEATHER_BIT_API_KEY }}";
             } else {
                 var weather_date_1 = new Date(weather_date);
                 weather_date_1.setDate(weather_date_1.getDate() + 1);
                 weather_date_1 = weather_date_1.toLocaleDateString().split("/").reverse().join("-");
-                apiURL = "{{ settings.WEATHER_BIT_API_URL }}?lat=" + latitude + "&lon=" + longitude + "&start_date=" + weather_date + "&end_date=" + weather_date_1 + "&units=S&key={{ settings.WEATHER_BIT_API_KEY }}";
+                apiURL = "{{ settings.WEATHER_BIT_API_URL }}?lat=" + latitude + "&lon=" + longitude + "&start_date=" + weather_date + "&end_date=" + weather_date_1 + "&key={{ settings.WEATHER_BIT_API_KEY }}";
             }
             $.ajax(apiURL, {
-                method: "GET"
+                method: "GET",
+                crossDomain: true,
             })
             .done(function (data, textStatus, jqXHR) {
                 if (jqXHR.status === 200) {
@@ -372,10 +375,10 @@ $(function () {
                     $("#place").text(place);
                     $("#geo-lat").text(latitude + "°");
                     $("#geo-long").text(longitude + "°");
-                    $("#temperature").text(data.data[0].temp);
+                    $("#temperature").text((data.data[0].temp + 273.15).toFixed(2));
                     if (data.data[0]['app_temp'] !== undefined) {
                         $("#feels_like_h6").show();
-                        $("#feels_like").text(data.data[0].app_temp);
+                        $("#feels_like").text((data.data[0].app_temp + 273.15).toFixed(2));
                     } else {
                         $("#feels_like_h6").hide();
                     }
@@ -388,7 +391,7 @@ $(function () {
                     }
                     if (data.data[0]['vis'] !== undefined) {
                         $("#visibility_h6").show();
-                        $("#visibility").text(data.data[0].vis * 1000);
+                        $("#visibility").text((data.data[0].vis * 1000).toFixed(2));
                     } else {
                         $("#visibility_h6").hide();
                     }
@@ -397,18 +400,22 @@ $(function () {
                     if ($("#downloadReport").is(":checked")) {
                         var text = place + "Weather Report - " +  report_time + "\n\n";
                         text = text + "Latitude : " + latitude + "°\nLongitude : " + longitude + "°\n";
-                        text = text + "Temperature : " + data.data[0].temp + " K\n";
+                        text = text + "Temperature : " + ((data.data[0].temp + 273.15).toFixed(2)) + " K\n";
                         if (data.data[0]['app_temp'] !== undefined) {
-                            text = text + "Feels like : " + data.data[0].app_temp + " K\n";
+                            text = text + "Feels like : " + ((data.data[0].app_temp + 273.15).toFixed(2)) + " K\n";
                         }
                         if (data.data[0]['weather'] !== undefined) {
                             text = text + "Weather Type : " + data.data[0].weather.description.charAt(0).toUpperCase() + data.data[0].weather.description.slice(1) + "\n";
                         }
                         text = text + "Humidity : " + data.data[0].rh + " %\n";
                         text = text + "Wind Speed : " + data.data[0].wind_spd + " meter/sec\n";
-                        text = text + "UV Index : " + data.data[0].uv + "\n";
+                        if (data.data[0]['uv'] !== undefined) {
+                            text = text + "UV Index : " + data.data[0].uv + "\n";
+                        } else {
+                            text = text + "UV Index : " + data.data[0].max_uv + "\n";
+                        }
                         if (data.data[0]['vis'] !== undefined) {
-                            text = text + "Visibility : " + (data.data[0].vis * 1000) + " meters\n";
+                            text = text + "Visibility : " + ((data.data[0].vis * 1000).toFixed(2)) + " meters\n";
                         }
                         text = text + "Sea-Level Pressure : " + data.data[0].slp + " millibars\n";
                         downloadReport(place, text);
@@ -590,7 +597,7 @@ $(function () {
                 if (country === null || state === null) {
                     alert("Please select an option");
                 } else if (country !== null && state !== null) {
-                    apiURL = "{{ settings.LAT_LONG_API }}" + state + "," + country + "?json=1";
+                    apiURL = "{{ settings.LOCATION_IQ_LAT_LONG_API }}&q=" + state + "," + country + "&format=json";
                     fetchLatLong(apiURL);
                 }
             } else {
@@ -602,7 +609,7 @@ $(function () {
                 if (country === null || state === null || city === null) {
                     alert("Please select an option");
                 } else if (country !== null && city !== null) {
-                    apiURL = "{{ settings.LAT_LONG_API }}" + city + "," + country + "?json=1";
+                    apiURL = "{{ settings.LOCATION_IQ_LAT_LONG_API }}&q=" + city + "," + country + "&format=json";
                     fetchLatLong(apiURL);
                 }
             }

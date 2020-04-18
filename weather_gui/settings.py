@@ -129,6 +129,8 @@ COUNTRY_API = "https://www.universal-tutorial.com/api/countries/"
 STATE_API = "https://www.universal-tutorial.com/api/states/"
 CITY_API = "https://www.universal-tutorial.com/api/cities/"
 LAT_LONG_API = "https://geocode.xyz/"
+LOCATION_IQ_EMAIL = "hobiye2520@lagsixtome.com"
+LOCATION_IQ_LAT_LONG_API = "https://us1.locationiq.com/v1/search.php?key=e97cc12d83cfbc"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
@@ -141,6 +143,7 @@ SETTINGS_EXPORT = [
     'WEATHER_BIT_API_KEY',
     'WEATHER_BIT_CURRENT_API_URL',
     'WEATHER_BIT_ICON_URL',
+    'LOCATION_IQ_LAT_LONG_API',
 ]
 
 STATIC_URL = '/static/'
