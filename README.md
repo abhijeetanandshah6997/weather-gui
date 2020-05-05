@@ -2,7 +2,7 @@
 
 A Django(Python Web Framework) Application that allows user to create and conduct program.
 
-The application has following features :
+The application has following features :-
 * Weather Report for Current Date
 * Weather Report for Past Date
 * Weather Report optional Download as Text File
